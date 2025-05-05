@@ -3,7 +3,7 @@ version: '3.8'
 services:
   nginx:
     build:
-      context: ./docker/dev/nginx
+      context: ./.docker/dev/nginx
       dockerfile: Dockerfile
     container_name: microelectronics_nginx
     restart: unless-stopped
@@ -21,8 +21,11 @@ services:
 
   php:
     build:
-      context: ./docker/dev/php
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: .docker/dev/php/Dockerfile
+      args:
+        HOST_UID: ${USER_ID:-1000}
+        HOST_GID: ${GROUP_ID:-1000}
     container_name: microelectronics_php
     restart: unless-stopped
     volumes:
@@ -80,8 +83,11 @@ services:
 
   queue_worker:
     build:
-      context: ./docker/dev/php
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: .docker/dev/php/Dockerfile
+      args:
+        HOST_UID: ${USER_ID:-1000}
+        HOST_GID: ${GROUP_ID:-1000}
     container_name: microelectronics_queue_worker
     restart: unless-stopped
     volumes:

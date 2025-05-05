@@ -1,0 +1,57 @@
+#!/usr/bin/make
+SHELL = /bin/sh
+
+export PWD := $(PWD)
+
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
+docker_bin := $(shell command -v docker 2> /dev/null)
+# Путь к docker-compose или docker compose в зависимости от наличия
+docker_compose_bin := $(shell command -v docker-compose 2> /dev/null)
+
+ifndef docker_compose_bin
+	docker_compose_bin := docker compose
+endif
+
+PHP_CONTAINER_NAME := php
+
+APP_CONTAINER_RUN := $(docker_compose_bin) run --rm $(PHP_CONTAINER_NAME)
+
+install: docker-down-clear docker-build vendor-install db-init
+
+docker-up: memory
+	$(docker_compose_bin) up -d
+
+docker-down:
+	$(docker_compose_bin) down
+
+docker-down-clear:
+	$(docker_compose_bin) down -v --remove-orphans
+
+docker-build: memory
+	$(docker_compose_bin) up --build -d
+
+# DataBase
+db-init:
+	echo "Waiting for db..."
+	sleep 5
+	make db-migrations
+	make db-seeds
+
+db-fresh:
+	$(APP_CONTAINER_RUN) php artisan migrate:fresh
+
+db-migrations:
+	$(APP_CONTAINER_RUN) php artisan migrate --force
+
+db-seeds:
+	$(APP_CONTAINER_RUN) php artisan db:seed
+
+vendor-install:
+	$(docker_compose_bin) exec -u www-data $(PHP_CONTAINER_NAME) composer install
+
+memory:
+	sudo sysctl -w vm.max_map_count=262144
