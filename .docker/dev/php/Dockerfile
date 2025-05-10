@@ -13,7 +13,6 @@ RUN apk add --no-cache --virtual .build-deps \
     libjpeg-turbo-dev \
     libpng-dev \
     libwebp-dev \
-    freetype-dev \
     oniguruma-dev \
     libxml2-dev
 
@@ -40,6 +39,7 @@ RUN apk add --no-cache \
     libpng \
     libjpeg-turbo \
     libwebp \
+    freetype \
     shadow \
     acl
 
