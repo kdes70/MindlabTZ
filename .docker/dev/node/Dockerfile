@@ -1,4 +1,15 @@
-FROM ubuntu:latest
-LABEL authors="kdes70"
+FROM node:18-alpine
 
-ENTRYPOINT ["top", "-b"]
+ARG UID
+ENV UID "${UID}"
+
+WORKDIR /app
+
+COPY ./frontend/package.json /app/package.json
+
+RUN yarn
+
+ENV HOST 0.0.0.0
+EXPOSE 3000
+
+CMD [ "yarn", "dev" ]

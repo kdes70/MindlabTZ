@@ -53,5 +53,14 @@ db-seeds:
 vendor-install:
 	$(docker_compose_bin) exec -u www-data $(PHP_CONTAINER_NAME) composer install
 
+shell: docker-up
+	$(docker_compose_bin) exec -it $(PHP_CONTAINER_NAME) sh
+
 memory:
 	sudo sysctl -w vm.max_map_count=262144
+
+perm:
+	echo "Setting permissions... $(USER)"
+	sudo chmod -R 775 backend/storage backend/bootstrap/cache
+	sudo chown -R $(USER):www-data backend/storage backend/bootstrap/cache
+	setfacl -Rdm u:$(USER):rwx,g:www-data:rwx,o::r-x backend/storage backend/bootstrap/cache
