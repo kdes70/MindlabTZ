@@ -3,9 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
-class CheckPermission
+class CheckPermission extends Middleware
 {
     public function handle(Request $request, Closure $next, $permission)
     {

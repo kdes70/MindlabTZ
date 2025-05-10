@@ -59,4 +59,13 @@ class User extends Authenticatable
         return $this->hasMany(UserSetting::class);
     }
 
+    public function hasPermission($permission): bool
+    {
+        if ($this->role) {
+            return $this->role->permissions->contains('slug', $permission);
+        }
+
+        return false;
+    }
+
 }
