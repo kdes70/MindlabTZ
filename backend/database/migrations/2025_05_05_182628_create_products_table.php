@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('article')->unique();
             $table->decimal('price', 15, 2);
+            $table->integer('quantity_in_stock')->default(0);
             $table->json('specifications')->nullable(); // TODO: JSON поле для хранения характеристик, по идее я бы вынес в отдельную таблицу, но пока будем считать что я плохо знаком с предметной областью (YAGNI)
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);

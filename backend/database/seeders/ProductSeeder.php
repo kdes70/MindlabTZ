@@ -17,9 +17,10 @@ class ProductSeeder extends Seeder
 
         $categories = Category::all();
 
-        // Привязываем для каждого продукта случайные категории
-        $products->each(fn($product) => $product->categories()->attach(
-            $categories->random(random_int(1, min(3, $categories->count())))->pluck('id')->all()
-        ));
+        $products->each(function ($product) use ($categories) {
+            $count = random_int(1, min(3, $categories->count()));
+            $ids = $categories->random($count)->pluck('id')->toArray();
+            $product->categories()->sync($ids);
+        });
     }
 }

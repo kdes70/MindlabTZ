@@ -8,7 +8,6 @@ class ActiveLogObserver
 {
     public function created(ActiveLog $activeLog): void
     {
-
     }
 
     public function updated(ActiveLog $activeLog): void

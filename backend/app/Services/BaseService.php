@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Providers\Repositories\BaseRepository;
+use App\Repositories\RepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseService
 {
-    public function __construct(protected BaseRepository $repository)
+    public function __construct(protected RepositoryInterface $repository)
     {
     }
 
@@ -18,7 +18,7 @@ abstract class BaseService
         return $this->repository->all();
     }
 
-    public function paginate($perPage = 15): LengthAwarePaginator
+    public function paginate($perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return $this->repository->paginate($perPage);
     }
@@ -28,24 +28,24 @@ abstract class BaseService
         return $this->repository->create($data);
     }
 
-    public function update($id, array $data): bool
+    public function update(int $id, array $data): ?Model
     {
         $model = $this->repository->findOrFail($id);
         return $this->repository->update($model, $data);
     }
 
-    public function delete($id): bool
+    public function delete(int $id): bool
     {
         $model = $this->repository->findOrFail($id);
         return $this->repository->delete($model);
     }
 
-    public function find($id): ?Model
+    public function find(int $id): ?Model
     {
         return $this->repository->find($id);
     }
 
-    public function findOrFail($id): Model
+    public function findOrFail(int $id): Model
     {
         return $this->repository->findOrFail($id);
     }

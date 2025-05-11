@@ -26,7 +26,6 @@ return new class extends Migration {
 
             $table->index('user_id');
             $table->index('action');
-            $table->index(['entity_type', 'entity_id']);
             $table->index('level');
             $table->index('created_at');
         });

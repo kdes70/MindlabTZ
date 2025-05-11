@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ActiveLog;
 use App\Services\ActiveLogService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ActiveLogController extends Controller
@@ -12,9 +13,10 @@ class ActiveLogController extends Controller
 
     public function __construct(protected ActiveLogService $logService)
     {
+        parent::__construct();
     }
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         // Проверка доступа с помощью политики ActiveLogPolicy
         $this->authorize('viewAny', ActiveLog::class);

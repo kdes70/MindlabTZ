@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Providers\Repositories;
+namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-abstract class BaseRepository
+abstract class BaseRepository implements RepositoryInterface
 {
     public function __construct(protected Model $model)
     {
@@ -17,9 +17,9 @@ abstract class BaseRepository
         return $this->model->all();
     }
 
-    public function paginate($perPage = 15, $columns = ['*']): LengthAwarePaginator
+    public function paginate(int $perPage = 15, array $filters = ['*']): LengthAwarePaginator
     {
-        return $this->model->paginate($perPage, $columns);
+        return $this->model->paginate($perPage, $filters);
     }
 
     public function create(array $attributes): Model
@@ -27,9 +27,11 @@ abstract class BaseRepository
         return $this->model->create($attributes);
     }
 
-    public function update(Model $model, array $attributes): bool
+    public function update(Model $model, array $attributes): ?Model
     {
-        return $model->update($attributes);
+        $model->update($attributes);
+
+        return $model->fresh();
     }
 
     public function delete(Model $model): bool
@@ -37,7 +39,7 @@ abstract class BaseRepository
         return $model->delete();
     }
 
-    public function find($id): ?Model
+    public function find(int $id): ?Model
     {
         return $this->model->find($id);
     }
