@@ -20,7 +20,7 @@ PHP_CONTAINER_NAME := php
 
 APP_CONTAINER_RUN := $(docker_compose_bin) run --rm $(PHP_CONTAINER_NAME)
 
-install: docker-down-clear docker-build vendor-install db-init
+install: docker-down-clear docker-build vendor-install db-init app-reset
 
 docker-up: memory
 	$(docker_compose_bin) up -d
@@ -38,7 +38,7 @@ docker-build: memory
 db-init:
 	echo "Waiting for db..."
 	sleep 5
-	make db-migrations
+	make db-fresh
 	make db-seeds
 
 db-fresh:
@@ -49,6 +49,11 @@ db-migrations:
 
 db-seeds:
 	$(APP_CONTAINER_RUN) php artisan db:seed
+
+app-reset:
+	$(APP_CONTAINER_RUN) php artisan config:clear
+	$(APP_CONTAINER_RUN) php artisan route:clear
+	$(APP_CONTAINER_RUN) php artisan view:clear
 
 vendor-install:
 	$(docker_compose_bin) exec -u www-data $(PHP_CONTAINER_NAME) composer install
@@ -61,6 +66,6 @@ memory:
 
 perm:
 	echo "Setting permissions... $(USER)"
-	sudo chmod -R 775 backend/storage backend/bootstrap/cache
-	sudo chown -R $(USER):www-data backend/storage backend/bootstrap/cache
+	sudo chmod -R 775 backend/storage backend/bootstrap/cache frontend
+	sudo chown -R $(USER):www-data backend/storage backend/bootstrap/cache frontend
 	setfacl -Rdm u:$(USER):rwx,g:www-data:rwx,o::r-x backend/storage backend/bootstrap/cache

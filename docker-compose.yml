@@ -1,133 +1,136 @@
-services:
-  nginx:
-    build:
-      context: ./.docker/dev/nginx
-      dockerfile: Dockerfile
-    container_name: microelectronics_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    volumes:
-      - ./backend:/var/www/html
-      - ./.docker/dev/nginx/conf.d:/etc/nginx/conf.d
-    networks:
-      - microelectronics_network
-    depends_on:
-      - php
-      - mysql
-      - redis
+  services:
+    nginx:
+      build:
+        context: ./.docker/dev/nginx
+        dockerfile: Dockerfile
+      container_name: microelectronics_nginx
+      restart: unless-stopped
+      ports:
+        - "8000:80"
+      volumes:
+        - ./backend:/var/www/html
+        - ./.docker/dev/nginx/conf.d:/etc/nginx/conf.d
+      networks:
+        - microelectronics_network
+      depends_on:
+        - php
+        - mysql
+        - redis
 
-  php:
-    build:
-      context: .
-      dockerfile: .docker/dev/php/Dockerfile
-      args:
-        HOST_UID: ${USER_ID:-1000}
-        HOST_GID: ${GROUP_ID:-1000}
-    container_name: microelectronics_php
-    restart: unless-stopped
-    environment:
-      DB_HOST: ${DB_HOST:-mysql}
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      DB_DATABASE: ${DB_DATABASE:-microelectronics}
-      DB_USERNAME: ${DB_USERNAME:-user}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
-    volumes:
-      - ./backend:/var/www/html
-      - ./.docker/dev/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-    networks:
-      - microelectronics_network
-    depends_on:
-      - mysql
-      - redis
+    php:
+      build:
+        context: .
+        dockerfile: .docker/dev/php/Dockerfile
+        args:
+          HOST_UID: ${USER_ID:-1000}
+          HOST_GID: ${GROUP_ID:-1000}
+      container_name: microelectronics_php
+      restart: unless-stopped
+      environment:
+        DB_HOST: ${DB_HOST:-mysql}
+        REDIS_HOST: ${REDIS_HOST:-redis}
+        DB_DATABASE: ${DB_DATABASE:-microelectronics}
+        DB_USERNAME: ${DB_USERNAME:-user}
+        DB_PASSWORD: ${DB_PASSWORD:-password}
+      volumes:
+        - ./backend:/var/www/html
+        - ./.docker/dev/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      networks:
+        - microelectronics_network
+      depends_on:
+        - mysql
+        - redis
 
-  node:
-    build:
-      context: .
-      dockerfile: .docker/dev/node/Dockerfile
-      args:
-        UID: ${USER_ID:-1000}
-    container_name: microelectronics_node
-    restart: unless-stopped
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-    command: sh -c "yarn install && yarn dev"
-    ports:
-      - "3000:3000"
-    networks:
-      - microelectronics_network
+    node:
+      build:
+        context: .
+        dockerfile: .docker/dev/node/Dockerfile
+        args:
+          UID: ${USER_ID:-1000}
+      container_name: microelectronics_node
+      restart: unless-stopped
+      working_dir: /app
+      environment:
+        NODE_ENV: development
+        VUE_APP_API_URL: ${VUE_APP_API_URL:-http://localhost:8000}
+      volumes:
+        - ./frontend:/app
+      command: sh -c "yarn install && yarn dev"
+      ports:
+        - "3000:3000"
+      networks:
+        - microelectronics_network
 
-  mysql:
-    image: mysql:8.0
-    container_name: microelectronics_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-microelectronics}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
-      MYSQL_USER: ${DB_USERNAME:-user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./.docker/dev/mysql/my.cnf:/etc/mysql/my.cnf
-    networks:
-      - microelectronics_network
+    mysql:
+      image: mysql:8.0
+      container_name: microelectronics_mysql
+      restart: unless-stopped
+      environment:
+        MYSQL_DATABASE: ${DB_DATABASE:-microelectronics}
+        MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+        MYSQL_USER: ${DB_USERNAME:-user}
+        MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+        SERVICE_TAGS: dev
+        SERVICE_NAME: mysql
+      ports:
+        - "3306:3306"
+      volumes:
+        - mysql_data:/var/lib/mysql
+        - ./.docker/dev/mysql/my.cnf:/etc/mysql/my.cnf
+      networks:
+        - microelectronics_network
 
-  redis:
-    image: redis:alpine
-    container_name: microelectronics_redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - microelectronics_network
+    redis:
+      image: redis:alpine
+      container_name: microelectronics_redis
+      restart: unless-stopped
+      command: redis-server --appendonly yes
+      ports:
+        - "6379:6379"
+      volumes:
+        - redis_data:/data
+      networks:
+        - microelectronics_network
 
-  queue_worker:
-    build:
-      context: .
-      dockerfile: .docker/dev/php/Dockerfile
-      args:
-        HOST_UID: ${USER_ID:-1000}
-        HOST_GID: ${GROUP_ID:-1000}
-    container_name: microelectronics_queue_worker
-    restart: unless-stopped
-    volumes:
-      - ./backend:/var/www/html
-    command: php artisan queue:work --tries=3
-    networks:
-      - microelectronics_network
-    depends_on:
-      - php
-      - mysql
-      - redis
+    queue_worker:
+      build:
+        context: .
+        dockerfile: .docker/dev/php/Dockerfile
+        args:
+          HOST_UID: ${USER_ID:-1000}
+          HOST_GID: ${GROUP_ID:-1000}
+      container_name: microelectronics_queue_worker
+      restart: unless-stopped
+      volumes:
+        - ./backend:/var/www/html
+      command: php artisan queue:work --tries=3
+      networks:
+        - microelectronics_network
+      depends_on:
+        - php
+        - mysql
+        - redis
 
-  laravel_echo:
-    image: node:18-alpine
-    container_name: microelectronics_echo
-    restart: unless-stopped
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-    command: sh -c "npm install -g laravel-echo-server && laravel-echo-server start"
-    ports:
-      - "6001:6001"
-    networks:
-      - microelectronics_network
-    depends_on:
-      - redis
-      - php
+    laravel_echo:
+      image: node:18-alpine
+      container_name: microelectronics_echo
+      restart: unless-stopped
+      working_dir: /app
+      volumes:
+        - ./backend:/app
+      command: sh -c "npm install -g laravel-echo-server && laravel-echo-server start"
+      ports:
+        - "6001:6001"
+      networks:
+        - microelectronics_network
+      depends_on:
+        - redis
+        - php
 
-networks:
-  microelectronics_network:
-    driver: bridge
+  networks:
+    microelectronics_network:
+      driver: bridge
 
-volumes:
-  mysql_data:
-  redis_data:
+  volumes:
+    mysql_data:
+    redis_data:
