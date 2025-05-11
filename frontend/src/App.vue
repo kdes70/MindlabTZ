@@ -1,85 +1,166 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div id="app">
+    <!-- Компонент для отображения уведомлений -->
+    <Toast />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <!-- Навигационная панель -->
+    <nav v-if="isAuthenticated" class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Микроэлектроника</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <router-link class="nav-link" to="/products">Товары</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/sales">Продажи</router-link>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <button @click="logout" class="btn btn-outline-light btn-sm">Выход</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+    <!-- Контейнер для страниц -->
+    <div class="container-fluid">
+      <router-view />
     </div>
-  </header>
-
-  <RouterView />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
+<script>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from '@/composables/useToast';
+import AuthService from '@/services/AuthService';
+import Toast from '@/components/Toast.vue';
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+export default {
+  name: 'App',
+  components: {
+    Toast
+  },
+  setup() {
+    const { showToast } = useToast();
+    const router = useRouter();
+    const isAuthenticated = ref(false);
+    const user = ref(null);
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
+    // Проверка аутентификации при загрузке приложения
+    const checkAuth = async () => {
+      try {
+        // Проверяем наличие токена в localStorage
+        const token = localStorage.getItem('authToken');
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
+        if (!token) {
+          isAuthenticated.value = false;
+          user.value = null;
+          return;
+        }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
+        // Получаем информацию о пользователе
+        const userData = await AuthService.getCurrentUser();
+        isAuthenticated.value = true;
+        user.value = userData;
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
+        // Если пользователь не на странице входа, оставляем его на текущей странице
+        if (router.currentRoute.value.path === '/login') {
+          router.push({ name: 'Products' });
+        }
+      } catch (error) {
+        console.error('Authentication check failed:', error);
+        isAuthenticated.value = false;
+        user.value = null;
+        localStorage.removeItem('authToken');
 
-nav a:first-of-type {
-  border: 0;
-}
+        // Перенаправляем на страницу входа, если не на ней
+        if (router.currentRoute.value.path !== '/login') {
+          router.push({ name: 'Login' });
+        }
+      }
+    };
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+    // Выход из системы
+    const logout = async () => {
+      try {
+        await AuthService.logout();
+        isAuthenticated.value = false;
+        user.value = null;
+        localStorage.removeItem('authToken');
+        router.push({ name: 'Login' });
+        showToast('Вы успешно вышли из системы', 'success');
+      } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Ошибка при выходе из системы', 'error');
+      }
+    };
+
+    // Инициализация проверки аутентификации при монтировании компонента
+    onMounted(() => {
+      checkAuth();
+    });
+
+    return {
+      isAuthenticated,
+      user,
+      logout
+    };
   }
+};
+</script>
 
-  .logo {
-    margin: 0 2rem 0 0;
+<style>
+/* Дополнительные стили для приложения */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container-fluid {
+  flex: 1;
+  padding: 20px;
+}
+
+/* Стили для навигационной панели */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+/* Стили для мобильного меню */
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    margin-top: 10px;
   }
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+/* Стили для контейнера */
+.container-fluid {
+  max-width: 100%;
+  padding: 20px;
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+/* Общие стили для карточек */
+.card {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  border: none;
+  border-radius: 0.5rem;
+}
 
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
 }
 </style>
