@@ -1,6 +1,5 @@
 // src/services/CategoryService.js
-import axios from 'axios';
-import {API_URL} from '@/config';
+import api from './api';
 
 class CategoryService {
   /**
@@ -11,7 +10,7 @@ class CategoryService {
    */
   async getCategories(params = {}) {
     try {
-      const response = await axios.get(`${API_URL}/api/categories`, {params});
+      const response = await api.get('/categories', { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -27,7 +26,7 @@ class CategoryService {
    */
   async createCategory(categoryData) {
     try {
-      const response = await axios.post(`${API_URL}/api/categories`, categoryData);
+      const response = await api.post('/categories', categoryData);
       return response.data;
     } catch (error) {
       console.error('Error creating category:', error);
@@ -44,7 +43,7 @@ class CategoryService {
    */
   async updateCategory(id, categoryData) {
     try {
-      const response = await axios.put(`${API_URL}/api/categories/${id}`, categoryData);
+      const response = await api.put(`/categories/${id}`, categoryData);
       return response.data;
     } catch (error) {
       console.error(`Error updating category with id ${id}:`, error);
@@ -60,7 +59,7 @@ class CategoryService {
    */
   async deleteCategory(id) {
     try {
-      const response = await axios.delete(`${API_URL}/api/categories/${id}`);
+      const response = await api.delete(`/categories/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error deleting category with id ${id}:`, error);

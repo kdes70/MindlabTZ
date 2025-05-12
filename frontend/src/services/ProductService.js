@@ -1,5 +1,5 @@
-import axios from 'axios';
-import {API_URL} from '@/config';
+import api from './api';
+import { API_URL } from '@/config';
 
 class ProductService {
   /**
@@ -16,7 +16,7 @@ class ProductService {
    */
   async getProducts(params = {}) {
     try {
-      const response = await axios.get(`${API_URL}/api/products`, {params});
+      const response = await api.get('/products', { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -32,7 +32,7 @@ class ProductService {
    */
   async getProduct(id) {
     try {
-      const response = await axios.get(`${API_URL}/api/products/${id}`);
+      const response = await api.get(`/products/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching product with id ${id}:`, error);
@@ -48,7 +48,7 @@ class ProductService {
    */
   async createProduct(productData) {
     try {
-      const response = await axios.post(`${API_URL}/api/products`, productData);
+      const response = await api.post('/products', productData);
       return response.data;
     } catch (error) {
       console.error('Error creating product:', error);
@@ -65,7 +65,7 @@ class ProductService {
    */
   async updateProduct(id, productData) {
     try {
-      const response = await axios.put(`${API_URL}/api/products/${id}`, productData);
+      const response = await api.put(`/products/${id}`, productData);
       return response.data;
     } catch (error) {
       console.error(`Error updating product with id ${id}:`, error);
@@ -81,7 +81,7 @@ class ProductService {
    */
   async deleteProduct(id) {
     try {
-      const response = await axios.delete(`${API_URL}/api/products/${id}`);
+      const response = await api.delete(`/products/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error deleting product with id ${id}:`, error);
@@ -98,7 +98,7 @@ class ProductService {
    */
   async getProductPriceHistory(id, params = {}) {
     try {
-      const response = await axios.get(`${API_URL}/api/products/${id}/price-history`, {params});
+      const response = await api.get(`/products/${id}/price-history`, { params });
       return response.data;
     } catch (error) {
       console.error(`Error fetching price history for product with id ${id}:`, error);
@@ -114,7 +114,7 @@ class ProductService {
    */
   async bulkSaveProducts(productsData) {
     try {
-      const response = await axios.post(`${API_URL}/api/products/bulk`, productsData);
+      const response = await api.post('/products/bulk', productsData);
       return response.data;
     } catch (error) {
       console.error('Error bulk saving products:', error);
@@ -129,7 +129,7 @@ class ProductService {
    */
   async exportProductsToCSV() {
     try {
-      const response = await axios.get(`${API_URL}/api/products/export`, {
+      const response = await api.get('/products/export', {
         responseType: 'blob'
       });
       return response.data;
