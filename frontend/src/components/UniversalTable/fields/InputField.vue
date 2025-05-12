@@ -1,4 +1,3 @@
-<!-- components/UniversalTable/fields/InputField.vue -->
 <template>
   <input
     v-if="editMode"

@@ -1,4 +1,3 @@
-<!-- components/UniversalTable/fields/DateField.vue -->
 <template>
   <input
     v-if="editMode"

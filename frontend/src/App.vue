@@ -1,9 +1,7 @@
 <template>
   <div id="app">
-    <!-- Компонент для отображения уведомлений -->
     <Toast />
 
-    <!-- Навигационная панель -->
     <nav v-if="isAuthenticated" class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Микроэлектроника</a>
@@ -29,7 +27,6 @@
       </div>
     </nav>
 
-    <!-- Контейнер для страниц -->
     <div class="container-fluid">
       <router-view />
     </div>

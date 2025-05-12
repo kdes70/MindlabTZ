@@ -2,11 +2,21 @@
 import axios from 'axios';
 import {API_URL} from '@/config';
 
+const api = axios.create({
+  baseURL: '/api', // Используем прокси Vite
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  }
+});
+
+
 class AuthService {
 
   async login(credentials) {
     try {
-      const response = await axios.post(`${API_URL}/api/login`, credentials);
+      const response = await api.post(`${API_URL}/api/login`, credentials);
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
@@ -16,7 +26,7 @@ class AuthService {
 
   async register(userData) {
     try {
-      const response = await axios.post(`${API_URL}/api/register`, userData);
+      const response = await api.post(`${API_URL}/api/register`, userData);
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
@@ -26,7 +36,7 @@ class AuthService {
 
   async forgotPassword(email) {
     try {
-      const response = await axios.post(`${API_URL}/api/forgot-password`, {email});
+      const response = await api.post(`${API_URL}/api/forgot-password`, {email});
       return response.data;
     } catch (error) {
       console.error('Forgot password error:', error);
@@ -36,7 +46,7 @@ class AuthService {
 
   async resetPassword(data) {
     try {
-      const response = await axios.post(`${API_URL}/api/reset-password`, data);
+      const response = await api.post(`${API_URL}/api/reset-password`, data);
       return response.data;
     } catch (error) {
       console.error('Reset password error:', error);
@@ -44,25 +54,32 @@ class AuthService {
     }
   }
 
-  /**
-   * Выход из системы
-   *
-   * @returns {Promise} - Promise с данными
-   */
   async logout() {
     try {
-      await axios.post(`${API_URL}/logout`, {}, {
+      await api.post(`${API_URL}/logout`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('authToken')}`
         }
       });
-
-      localStorage.removeItem('authToken');
       return true;
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
+  }
+
+  async getCurrentUser() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      const response = await api.get(`${API_URL}/me`, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      return response.data;
+    }
+    return null;
   }
 }
 

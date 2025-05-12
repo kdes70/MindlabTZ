@@ -1,4 +1,3 @@
-<!-- components/UniversalTable/fields/SelectField.vue -->
 <template>
   <select
     v-if="editMode"
