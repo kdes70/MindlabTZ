@@ -19,6 +19,7 @@ abstract class BaseApiController extends Controller
 
     public function __construct(protected BaseService $service, protected ActiveLogService $logService)
     {
+        parent::__construct();
     }
 
     public function index(Request $request): AnonymousResourceCollection
