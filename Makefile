@@ -51,9 +51,10 @@ db-seeds:
 	$(APP_CONTAINER_RUN) php artisan db:seed
 
 app-reset:
+	$(APP_CONTAINER_RUN) php artisan key:generate
 	$(APP_CONTAINER_RUN) php artisan config:clear
 	$(APP_CONTAINER_RUN) php artisan route:clear
-	$(APP_CONTAINER_RUN) php artisan view:clear
+	$(APP_CONTAINER_RUN) php artisan cache:clear
 
 vendor-install:
 	$(docker_compose_bin) exec -u www-data $(PHP_CONTAINER_NAME) composer install

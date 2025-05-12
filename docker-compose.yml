@@ -1,7 +1,7 @@
   services:
     nginx:
       build:
-        context: ./.docker/dev/nginx
+        context: .docker/dev/nginx
         dockerfile: Dockerfile
       container_name: microelectronics_nginx
       restart: unless-stopped
